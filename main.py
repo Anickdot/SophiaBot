@@ -1,8 +1,11 @@
-import dotenv
 import json
 import os
 import re
+
+import dotenv
 import requests
+
+from bot import send_message
 
 dotenv.load_dotenv()
 
@@ -26,27 +29,22 @@ def get_last_github_release(owner: str, name: str) -> tuple[str, str] | None:
     response = requests.get(f'https://api.github.com/repos/{owner}/{name}/releases')
     json_object = json.loads(response.content)
 
-    if json_object.get('message'):
-        print("API requests limit!")   # ToDo
-    else:
-        if (len(json_object)):
-            return (json_object[0]['tag_name'], json_object[0]['published_at'])
+    if (len(json_object)):
+        return (json_object[0]['tag_name'], json_object[0]['published_at'])
 
 
 def main():
-    f = open('currencies.json')
-    a = json.load(f)
-    f.close()
+    with open('currencies.json', 'r') as file:
+        currencies = json.load(file)
 
-    for pair in a:
+    result = ''
+    for pair in currencies[:1]:
         curr, cmc = pair['currency'], pair['cmcId']
-        print(curr)
-
         if (repository := get_github_repo(cmc)):
             if (release := get_last_github_release(repository[0], repository[1])):
-                print(release)
-        
-        print()
+                result += f'{curr.upper()}: {release[0]}  {release[1]}\n'
+    
+    send_message(result)
 
 if __name__ == '__main__':
     main()
