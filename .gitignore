@@ -1,4 +1,5 @@
 .venv
 .env
 currencies.json
+local_db.json
 __pycache__

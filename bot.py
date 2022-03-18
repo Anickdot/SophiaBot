@@ -8,4 +8,4 @@ def send_message(text: str) -> None:
 
     bot = telebot.TeleBot(os.environ['TOKEN'])
 
-    bot.send_message(os.environ['CHAT_ID'], text)
+    bot.send_message(os.environ['CHAT_ID'], text, parse_mode='HTML')
