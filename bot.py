@@ -1,11 +1,13 @@
 import os
 
 import dotenv
-import telebot
+import requests
+
 
 def send_message(text: str) -> None:
     dotenv.load_dotenv()
 
-    bot = telebot.TeleBot(os.environ['TOKEN'])
-
-    bot.send_message(os.environ['CHAT_ID'], text, parse_mode='HTML')
+    requests.get(
+        f'https://api.telegram.org/bot{os.environ["TOKEN"]}/sendMessage',
+        params={'chat_id': os.environ['CHAT_ID'], 'text': text, 'parse_mode': 'HTML'}
+    )   

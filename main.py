@@ -1,7 +1,6 @@
 import json
 import os
 import re
-from urllib import response
 
 import dotenv
 import requests
@@ -51,6 +50,7 @@ def main():
             release = get_last_github_release(repository[0], repository[1])
             if update_local_data(curr, release):
                 result += f'<a href="https://github.com/{repository[0]}/{repository[1]}/releases">{curr.upper()}</a>: {release}\n'
+    
     if result:
         result = 'New Token Release:\n' + result
         send_message(result)
