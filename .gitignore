@@ -2,4 +2,5 @@
 .env
 currencies.json
 local_db.json
+local_github.json
 __pycache__
