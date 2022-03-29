@@ -1,40 +1,18 @@
-import json
 import os
 
+import dotenv
+import psycopg2
 
-def get_local_data(currency: str) -> str | None:
-    if not os.path.exists('local_db.json'):
-        with open('local_db.json', 'w+') as file:
-            json.dump([], file)
+dotenv.load_dotenv()
 
-    with open('local_db.json', 'r') as file:
-        data = json.load(file)
-    
-    for pair in data:
-        if pair['currency'] == currency:
-            return pair['version']
-    
-    return None
 
-def update_local_data(currency: str, version: str) -> bool:
-    if not os.path.exists('local_db.json'):
-        with open('local_db.json', 'w+') as file:
-            json.dump([], file)
-    
-    with open('local_db.json', 'r') as file:
-        data = json.load(file)
-    
-    result = False
-
-    for pair in data:
-        if pair['currency'] == currency:
-            result = pair['version'] != version
-            pair['version'] = version
-            break
-    else:
-        data.append({'currency': currency, 'version': version})
-
-    with open('local_db.json', 'w+') as file:
-        json.dump(data, file)
-    
-    return result
+class Database:
+    def __init__(self):
+        connection = psycopg2.connect(
+            dbname=os.environ['DB_NAME'], 
+            user=os.environ['DB_USER'], 
+            password=os.environ['DB_PASSWORD'], 
+            host=os.environ['DB_HOST']
+        )
+        connection.autocommit = True
+        self.cursor = connection.cursor()
