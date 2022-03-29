@@ -1,6 +1,7 @@
 import os
 
 import dotenv
+from apscheduler.schedulers.blocking import BlockingScheduler
 
 from bot import (get_github, get_last_release, get_local_github, send_message,
                  update_local_db)
@@ -8,7 +9,11 @@ from database import Database
 
 dotenv.load_dotenv()
 
-def main():
+sched = BlockingScheduler()
+
+@sched.scheduled_job('cron', minute=0)
+def job():
+    send_message(os.environ["TOKEN"], os.environ['CHAT_ID'], "Starting...")
     database = Database()
     
     result = ''
@@ -25,6 +30,6 @@ def main():
         result = 'New Token Release:\n' + result
         send_message(os.environ["TOKEN"], os.environ['CHAT_ID'], result)
 
+    database.cursor.close()
 
-if __name__ == '__main__':
-    main()
+sched.start()
