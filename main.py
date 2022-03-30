@@ -9,9 +9,9 @@ from database import Database
 
 dotenv.load_dotenv()
 
-sched = BlockingScheduler()
+sched = BlockingScheduler(timezone='Europe/Moscow')
 
-@sched.scheduled_job('cron', minute=0)
+@sched.scheduled_job('cron', hour=17, minute=0)
 def job():
     send_message(os.environ["TOKEN"], os.environ['CHAT_ID'], "Starting...")
     database = Database()
