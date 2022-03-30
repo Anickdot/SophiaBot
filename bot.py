@@ -2,10 +2,12 @@ import json
 import os
 import re
 
+import dotenv
 import requests
 
 from database import Database
 
+dotenv.load_dotenv()
 
 def send_message(token: str, chat_id: str, text: str) -> None:
     requests.get(
@@ -19,6 +21,8 @@ def get_local_github(database: Database, ticker: str) -> tuple[str, str] | None:
 
     if len(responce):
         return (responce[0][1], responce[0][2])
+    
+    send_message(os.environ['TOKEN'], os.environ['ADMIN_ID'], f'Отсутствует исходный код монеты {ticker}')
 
 def get_github(cmc_id: int) -> tuple[str, str] | None:
     response = requests.get(
@@ -28,22 +32,24 @@ def get_github(cmc_id: int) -> tuple[str, str] | None:
     )
     json_object = json.loads(response.content)
 
-    ticker = json_object['data'][str(cmc_id)]['symbol']
-    source_code = json_object['data'][str(cmc_id)]['urls']['source_code']
+    try:
+        source_code = json_object['data'][str(cmc_id)]['urls']['source_code']
+    except KeyError as e:
+        send_message(os.environ['TOKEN'], os.environ['CHAT_ID'], e.with_traceback())
+    else:
+        if not len(source_code):
+            return
 
-    if not len(source_code):
-        print(f'No source code for {ticker}')
-        return
-
-    for scode in source_code:
-        if (match := re.fullmatch('^https:\/\/github\.com\/(.+)\/(.+)$', scode)):
-            return (match[1], match[2])
+        for scode in source_code:
+            if (match := re.fullmatch('^https:\/\/github\.com\/(.+)\/(.+)$', scode)):
+                return (match[1], match[2])
 
 def get_last_release(owner: str, name: str) -> str:
     response = requests.get(f'https://api.github.com/repos/{owner}/{name}/releases')
     json_object = json.loads(response.content)
     
     if not isinstance(json_object, list):
+        send_message(os.environ['TOKEN'], os.environ['ADMIN_ID'], 'Превышен лимит запросов на GitHub')
         raise ConnectionError
 
     if not len(json_object):
@@ -64,3 +70,6 @@ def update_local_db(database: Database, currency: str, version: str) -> bool:
     
     database.cursor.execute('UPDATE local_currencies SET version = %s WHERE currency = %s', (version, currency))
     return True
+
+a = {'a': 1}
+print(a[str(2)])
