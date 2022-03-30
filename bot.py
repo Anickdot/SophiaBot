@@ -17,10 +17,8 @@ def get_local_github(database: Database, ticker: str) -> tuple[str, str] | None:
     database.cursor.execute('SELECT * FROM github WHERE currency = %s;', (ticker, ))
     responce = database.cursor.fetchall()
 
-    if not len(responce):
-        return
-    
-    return (responce[0][1], responce[0][2])
+    if len(responce):
+        return (responce[0][1], responce[0][2])
 
 def get_github(cmc_id: int) -> tuple[str, str] | None:
     response = requests.get(
@@ -31,7 +29,6 @@ def get_github(cmc_id: int) -> tuple[str, str] | None:
     json_object = json.loads(response.content)
 
     ticker = json_object['data'][str(cmc_id)]['symbol']
-
     source_code = json_object['data'][str(cmc_id)]['urls']['source_code']
 
     if not len(source_code):
@@ -49,10 +46,10 @@ def get_last_release(owner: str, name: str) -> str:
     if not isinstance(json_object, list):
         raise ConnectionError
 
-    if (len(json_object)):
-        return json_object[0]['tag_name']
+    if not len(json_object):
+        return '0'
     
-    return '0'
+    return json_object[0]['tag_name']
 
 def update_local_db(database: Database, currency: str, version: str) -> bool:
     database.cursor.execute('SELECT * from local_currencies WHERE currency = %s;', (currency, ))
