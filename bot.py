@@ -35,7 +35,7 @@ def get_github(cmc_id: int) -> tuple[str, str] | None:
     try:
         source_code = json_object['data'][str(cmc_id)]['urls']['source_code']
     except KeyError as e:
-        send_message(os.environ['TOKEN'], os.environ['CHAT_ID'], e.with_traceback())
+        send_message(os.environ['TOKEN'], os.environ['CHAT_ID'], f'Ошибка парсинга CMC ответа для ID={cmc_id}\n\n\n{e.with_traceback()}')
     else:
         if not len(source_code):
             return
@@ -70,6 +70,3 @@ def update_local_db(database: Database, currency: str, version: str) -> bool:
     
     database.cursor.execute('UPDATE local_currencies SET version = %s WHERE currency = %s', (version, currency))
     return True
-
-a = {'a': 1}
-print(a[str(2)])
