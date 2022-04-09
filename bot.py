@@ -21,8 +21,6 @@ def get_local_github(database: Database, ticker: str) -> tuple[str, str] | None:
 
     if len(responce):
         return (responce[0][1], responce[0][2])
-    
-    send_message(os.environ['TOKEN'], os.environ['ADMIN_ID'], f'Отсутствует исходный код монеты {ticker}')
 
 def get_github(cmc_id: int) -> tuple[str, str] | None:
     response = requests.get(
